@@ -29,7 +29,7 @@ namespace Gnome_sort
 
                 Stopwatch stopWatch = new Stopwatch(); //stopwatch
                 stopWatch.Start();
-                array = Gnome.SortCheck(array);
+                array = Gnome.Sort(array);
                 stopWatch.Stop();
                 allTimes.Add(stopWatch.ElapsedMilliseconds);
             }

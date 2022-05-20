@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,14 +11,14 @@ namespace Gnome_sort
 {
     public static class Gnome
     {
-        public static int[] Sort(int[] array)
+        public static T[] Sort<T>(T[] array) where T : IComparable<T>
         {
             var i = 1;
             var j = 2;
             var size = array.Length;
             while (i < size)
             {
-                if (array[i-1] < array[i])
+                if (array[i-1].CompareTo(array[i]) < 0)
                 {
                     i = j;
                     j = i + 1;
@@ -36,43 +37,43 @@ namespace Gnome_sort
             return array;
         }
 
-        public static int[] ParallelSortCheckTwoArrays(int[] array)
+        public static T[] ParallelSortCheckTwoArrays<T>(T[] array) where T : IComparable, IComparable<T>
         {
             int len = array.Length;
-            int[] arr1 = array.Take(len / 2).ToArray();
-            int[] arr2 = array.Skip(len / 2).ToArray();
+            T[] arr1 = array.Take(len / 2).ToArray();
+            T[] arr2 = array.Skip(len / 2).ToArray();
 
-            Task a1 = Task.Run(() => Gnome.Sort(arr1));
-            Task a2 = Task.Run(() => Gnome.Sort(arr2));
+            Task a1 = Task.Run<T[]>(() => Gnome.Sort(arr1));
+            Task a2 = Task.Run<T[]>(() => Gnome.Sort(arr2));
 
             a1.Wait();
             a2.Wait();
 
-            int[] result = merge(arr1, arr2);
+            T[] result = merge(arr1, arr2);
             return result;
         }
 
-        public static int[] ParallelSortCheckNArrays(int[] array,int count)
+        public static T[] ParallelSortCheckNArrays<T>(T[] array,int count) where T:IComparable, IComparable<T>
         {
-            List<int[]> arrays = CutArray(array, count);
+            List<T[]> arrays = CutArray(array, count);
             Task[] tasks = new Task[count];
 
             for (int i = 0; i < count; i++)
             {
                 int j = i;
-                tasks[j] = Task.Run(() => Gnome.Sort(arrays[j]));
+                tasks[j] = Task.Run<T[]>(() => Gnome.Sort(arrays[j]));
             }
 
             Task.WaitAll(tasks);
 
 
-            int[] result = mergeArraysFromList(arrays,array.Length);
+            T[] result = mergeArraysFromList(arrays,array.Length);
             return result;
         }
 
-        public static List<int[]> CutArray(int[] array, int count)
+        public static List<T[]> CutArray<T>(T[] array, int count)
         {
-            List<int[]> arrays = new List<int[]>();
+            List<T[]> arrays = new List<T[]>();
             int partCount = array.Length / count;
             int counter = 0;
 
@@ -80,11 +81,11 @@ namespace Gnome_sort
             {
                 if (i < count-1)
                 {
-                    arrays.Add(new int[partCount]);
+                    arrays.Add(new T[partCount]);
                 }
                 else
                 {
-                    arrays.Add(new int[array.Length - counter]);
+                    arrays.Add(new T[array.Length - counter]);
                 }
                 for (int j = 0; j < arrays[i].Length; j++)
                 {
@@ -95,42 +96,16 @@ namespace Gnome_sort
             return arrays;
         }
 
-        public static int[] SortCheck(int[] array)
+       
+
+        private static void Swap<T>(int i, int l, ref T[] array)
         {
-            var i = 1;
-            var j = 2;
-            var size = array.Length;
-            while (i < size)
-            {
-                if (array[i - 1] < array[i])
-                {
-                    i = j;
-                    j = i + 1;
-                }
-                else
-                {
-                    Swap(i - 1, i, ref array);
-                    i--;
-                    if (i == 0)
-                    {
-                        i = j;
-                        j++;
-                    }
-                }
-            }
-            return array;
+            (array[l], array[i]) = (array[i], array[l]);
         }
 
-        private static void Swap(int i, int l, ref int[] array)
+        private static T[] mergeArraysFromList<T>(List<T[]> arrays,int length) where T:IComparable
         {
-            array[i] = array[l] - array[i];
-            array[l] -= array[i];
-            array[i] += array[l];
-        }
-
-        private static int[] mergeArraysFromList(List<int[]> arrays,int length)
-        {
-            int[] array = arrays[0];
+            T[] array = arrays[0];
             for (int i = 1; i < arrays.Count; i++)
             {
                 array = merge(array, arrays[i]);
@@ -139,15 +114,15 @@ namespace Gnome_sort
             return array;
         }
 
-        private static int[] merge(int[] left, int[] right)
+        private static T[] merge<T>(T[] left, T[] right)where T : IComparable
         {
-            int[] result = new int[left.Length + right.Length];
+            T[] result = new T[left.Length + right.Length];
 
             int firstCount = 0;
             int secondCount = 0;
             for (int i = 0; i < result.Length; i++)
             {
-                if (left[firstCount] < right[secondCount])
+                if (left[firstCount].CompareTo(right[secondCount]) < 0)
                 {
                     result[i] = left[firstCount];
                     firstCount++;
@@ -173,7 +148,7 @@ namespace Gnome_sort
             return result;
         }
 
-        private static int[] finishMerge(int[] main, int[] adit, int ind, int aditInd)
+        private static T[] finishMerge<T>(T[] main, T[] adit, int ind, int aditInd)
         {
             while (ind<main.Length)
             {
@@ -184,7 +159,6 @@ namespace Gnome_sort
 
             return main;
         }
-        
     }
 
 }
