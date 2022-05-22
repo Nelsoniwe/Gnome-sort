@@ -21,7 +21,7 @@ namespace Gnome_sort
                 if (array[i-1].CompareTo(array[i]) < 0)
                 {
                     i = j;
-                    j = i + 1;
+                    j += 1;
                 }
                 else
                 {
@@ -66,7 +66,6 @@ namespace Gnome_sort
 
             Task.WaitAll(tasks);
 
-
             T[] result = mergeArraysFromList(arrays,array.Length);
             return result;
         }
@@ -95,8 +94,6 @@ namespace Gnome_sort
             }
             return arrays;
         }
-
-       
 
         private static void Swap<T>(int i, int l, ref T[] array)
         {
@@ -158,6 +155,18 @@ namespace Gnome_sort
             }
 
             return main;
+        }
+
+        public static bool IsArraySorted<T>(T[] array) where T:IComparable
+        {
+            for (int i = 1; i < array.Length; i++)
+            {
+                if (array[i].CompareTo(array[i-1])<0)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
